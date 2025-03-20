@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>井字遊戲</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #FFD700; /* 背景顏色設定為黃色 */
+        }
+        .game-container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8); /* 加一點透明度，讓背景顯得更柔和 */
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            background-position: center;
+            background-size: cover;
+        }
+        .status {
+            font-size: 1.5rem;
+            margin-top: 20px;
+        }
+        .reset-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>井字遊戲</h1>
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <div class="status" id="status">玩家 X 的回合</div>
+        <button class="reset-btn" onclick="resetGame()">重新開始</button>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const status = document.getElementById('status');
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameOver = false;
+
+        const images = {
+            X: 'https://i.postimg.cc/SK11RynR/images.jpg', // 叉叉的圖片
+            O: 'https://i.postimg.cc/4dz85p87/images-1.jpg' // 圈圈的圖片
+        };
+
+        function checkWin() {
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],  // 橫行
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],  // 縱行
+                [0, 4, 8], [2, 4, 6]               // 對角線
+            ];
+
+            for (let combination of winningCombinations) {
+                const [a, b, c] = combination;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    return gameBoard[a];
+                }
+            }
+            return null;
+        }
+
+        function checkDraw() {
+            return gameBoard.every(cell => cell !== '');
+        }
+
+        function updateStatus() {
+            const winner = checkWin();
+            if (winner) {
+                status.textContent = `玩家 ${winner} 贏了！`;
+                gameOver = true;
+            } else if (checkDraw()) {
+                status.textContent = '平局！';
+                gameOver = true;
+            } else {
+                status.textContent = `玩家 ${currentPlayer} 的回合`;
+            }
+        }
+
+        function handleCellClick(event) {
+            const index = event.target.dataset.index;
+            if (gameBoard[index] !== '' || gameOver) return;
+
+            gameBoard[index] = currentPlayer;
+            event.target.style.backgroundImage = `url(${images[currentPlayer]})`; // 設定圖片為當前玩家的圖片
+
+            if (!gameOver) {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+
+            updateStatus();
+        }
+
+        function resetGame() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameOver = false;
+            status.textContent = `玩家 X 的回合`;
+            Array.from(board.children).forEach(cell => {
+                cell.style.backgroundImage = ''; // 清除格子的背景圖片
+            });
+        }
+
+        // 設定每個格子的點擊事件
+        Array.from(board.children).forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+    </script>
+</body>
+</html>
